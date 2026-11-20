@@ -6,7 +6,7 @@
     <title>3D PC Buyer Inspector — i5-14400F • ASUS RTX 5060 8GB • 32GB RAM</title>
     <meta
       name="description"
-      content="ตรวจเช็กสเปกคอมเกมมิ่งมือสองแบบ 3 มิติ หมุนดูชิ้นส่วน แยกชิ้นส่วน ดูผลเทสสุขภาพ และเทียบราคาตลาดไทย (Intel i5-14400F / ASUS RTX 5060 8GB / 32GB RAM / 2.25TB Storage)"
+      content="ตรวจเช็กสเปกคอมเกมมิ่งแบบ 3 มิติ หมุนดูชิ้นส่วน แยกชิ้นส่วน ดูรูปสินค้าจริงและผลตรวจเช็กเครื่อง (Intel i5-14400F / ASUS RTX 5060 8GB / 32GB RAM / 2.25TB Storage)"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,20 +36,20 @@
             <div class="brand-badge">3D INSPECT</div>
             <div class="brand-titles">
               <h1 id="header-title">i5-14400F • ASUS RTX 5060 8GB</h1>
-              <p id="header-sub">RAM 32GB • NVMe 1.25TB + HDD 1TB • ตรวจเช็กได้ทุกชิ้น</p>
+              <p id="header-sub">RAM 32GB • NVMe 1.25TB + HDD 1TB • คลิกดูรูปและสเปกจริงทุกชิ้น</p>
             </div>
           </div>
 
           <div class="top-actions">
-            <div class="price-pill" id="price-pill">
-              <span class="price-label" id="price-label">ราคาแนะนำ</span>
-              <strong id="price-amount">฿23,900</strong>
+            <div class="status-pill" id="status-pill">
+              <span class="status-live-dot"></span>
+              <span id="status-pill-text">พร้อมเทสก่อนรับ</span>
             </div>
             <button id="lang-toggle" class="icon-btn" type="button" title="Switch Thai / English">
               <span id="lang-label">EN</span>
             </button>
             <button id="drawer-toggle" class="icon-btn mobile-only" type="button" aria-label="Toggle Inspector">
-              <span id="drawer-toggle-label">ข้อมูล</span>
+              <span id="drawer-toggle-label">ดูสเปก</span>
             </button>
           </div>
         </header>
@@ -57,7 +57,7 @@
         <!-- Hint Banner -->
         <div class="hint-chip" id="hint-chip">
           <span class="pulse-dot"></span>
-          <span id="hint-text">ลากเพื่อหมุน • ซูมเข้าออก • คลิกชิ้นส่วนในเครื่องเพื่อดูสเปกและราคา</span>
+          <span id="hint-text">ลากเพื่อหมุน • ซูมเข้าออก • คลิกชิ้นส่วนในเครื่องเพื่อดูรูปสินค้าจริงและสเปก</span>
         </div>
 
         <!-- Bottom Floating 3D Control Dock -->
@@ -65,7 +65,7 @@
           <div class="dock-row">
             <button id="btn-glass" class="dock-btn active" type="button">
               <span class="btn-icon">🪟</span>
-              <span data-i18n="glassBtn">เปิดฝาข้าง</span>
+              <span data-i18n="glassBtn">ปิดฝาข้าง</span>
             </button>
             <button id="btn-explode" class="dock-btn" type="button">
               <span class="btn-icon">💥</span>
@@ -99,85 +99,62 @@
 
       <!-- Right Buyer Inspector Drawer -->
       <aside id="inspector-drawer" class="inspector-drawer">
-        <!-- Tabs -->
+        <!-- Tabs (Buyer-focused: No Pricing) -->
         <nav class="drawer-tabs" role="tablist">
           <button class="tab-btn active" data-tab="inspect" role="tab" aria-selected="true" data-i18n="tabInspect">
-            ชิ้นส่วน
-          </button>
-          <button class="tab-btn" data-tab="pricing" role="tab" aria-selected="false" data-i18n="tabPricing">
-            เทียบราคาไทย
+            ชิ้นส่วน & รูป
           </button>
           <button class="tab-btn" data-tab="health" role="tab" aria-selected="false" data-i18n="tabHealth">
-            ผลเทส
+            ผลตรวจเช็ก
           </button>
-          <button class="tab-btn" data-tab="listing" role="tab" aria-selected="false" data-i18n="tabListing">
-            ประกาศขาย
+          <button class="tab-btn" data-tab="specs" role="tab" aria-selected="false" data-i18n="tabSpecs">
+            สเปกทั้งหมด
           </button>
         </nav>
 
-        <!-- TAB 1: INSPECT -->
+        <!-- TAB 1: INSPECT WITH PRODUCT IMAGE -->
         <section id="tab-inspect" class="tab-panel active">
-          <!-- Selected Component Spotlight Card -->
           <div id="selected-card" class="spotlight-card"></div>
 
-          <!-- Legend -->
           <div class="legend-row">
-            <span class="badge verified" data-i18n="badgeVerified">✓ ตรวจจากระบบแล้ว</span>
-            <span class="badge unverified" data-i18n="badgeUnverified">⚠ รอตรวจด้วยตาเปล่า</span>
+            <span class="badge verified" data-i18n="badgeVerified">✓ ตรวจจากระบบจริง</span>
+            <span class="badge unverified" data-i18n="badgeUnverified">⚠ สอบถามรูปจริงจากผู้ขาย</span>
           </div>
 
-          <!-- Component List -->
           <div id="part-list" class="part-list"></div>
         </section>
 
-        <!-- TAB 2: PRICING -->
-        <section id="tab-pricing" class="tab-panel">
-          <div class="summary-card">
-            <div class="summary-header">
-              <span class="muted" data-i18n="askingLabel">ราคาตั้งขายแนะนำ (Facebook Marketplace)</span>
-              <strong class="big-price" id="pricing-main-ask">฿23,900</strong>
-            </div>
-            <p class="small-note" id="pricing-close-note">
-              ราคาปิดการขายจริงที่เหมาะสม: <strong>฿21,500 – ฿23,500</strong> (ตั้งเผื่อต่อรอง ~1,000–2,000 บาท ต่ำกว่าเครื่องมือหนึ่ง ฿27,000–฿29,490)
-            </p>
-
-            <label class="bundle-toggle">
-              <input type="checkbox" id="monitor-bundle-check" />
-              <span data-i18n="bundleMonitorLabel">บวกจอ Dahua LM30-E330CA 30" โค้ง 200Hz (+฿3,800)</span>
-            </label>
-          </div>
-
-          <div class="benchmark-box" id="benchmark-box"></div>
-          <div id="pricing-table-wrap" class="pricing-list"></div>
-        </section>
-
-        <!-- TAB 3: HEALTH & DIAGNOSTICS -->
+        <!-- TAB 2: HEALTH & DIAGNOSTICS -->
         <section id="tab-health" class="tab-panel">
           <div id="health-content"></div>
         </section>
 
-        <!-- TAB 4: MARKETPLACE LISTING & CONTACT -->
-        <section id="tab-listing" class="tab-panel">
-          <div class="listing-actions">
-            <button id="btn-copy-listing" class="primary-btn" type="button" data-i18n="copyListingBtn">
-              📋 คัดลอกประกาศภาษาไทย
-            </button>
-            <button id="btn-copy-specs" class="secondary-btn" type="button" data-i18n="copySpecsBtn">
-              คัดลอกเฉพาะสเปก
+        <!-- TAB 3: FULL SPEC SHEET -->
+        <section id="tab-specs" class="tab-panel">
+          <div class="spec-sheet-header">
+            <button id="btn-copy-specs" class="primary-btn" type="button" data-i18n="copySpecsBtn">
+              📋 คัดลอกสเปกทั้งหมด
             </button>
           </div>
           <div id="copy-toast" class="copy-toast hidden"></div>
-
-          <div class="seller-note-box">
-            <strong data-i18n="sellerConfigTitle">หมายเหตุสำหรับผู้ขาย (แก้ไขได้ใน src/data/pcData.ts)</strong>
-            <p data-i18n="sellerConfigDesc">
-              ข้อมูลในวงเล็บ [ระบุ...] คือส่วนที่ซอฟต์แวร์ตรวจไม่ได้ (PSU, เคส, ซิงค์, ประกัน, ช่องทางติดต่อ) กรุณาตรวจด้วยตาเปล่าและเติมก่อนโพสต์จริง
-            </p>
-          </div>
-
-          <pre id="listing-preview" class="listing-preview"></pre>
+          <div id="full-specs-content" class="full-specs-list"></div>
         </section>
       </aside>
+    </div>
+
+    <!-- Product Image Fullscreen Lightbox -->
+    <div id="image-lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Product image zoom">
+      <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+      <div class="lightbox-card">
+        <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close">✕</button>
+        <div class="lightbox-img-wrap">
+          <img id="lightbox-img" src="" alt="" />
+        </div>
+        <div class="lightbox-caption">
+          <strong id="lightbox-title"></strong>
+          <span id="lightbox-note"></span>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

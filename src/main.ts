@@ -3,10 +3,7 @@ import {
   DIAGNOSTIC_METRICS,
   I18N,
   PC_PARTS,
-  SELLER_CONFIG,
-  WHOLE_PC_BENCHMARKS,
   buildShortSpecs,
-  buildThaiListing,
   type Lang,
   type PartId,
   type PcPart,
@@ -31,8 +28,7 @@ const tooltipTitle = document.getElementById('tooltip-title') as HTMLElement;
 const tooltipSub = document.getElementById('tooltip-sub') as HTMLElement;
 
 const headerSub = document.getElementById('header-sub') as HTMLElement;
-const priceLabel = document.getElementById('price-label') as HTMLElement;
-const priceAmount = document.getElementById('price-amount') as HTMLElement;
+const statusPillText = document.getElementById('status-pill-text') as HTMLElement;
 const langToggle = document.getElementById('lang-toggle') as HTMLButtonElement;
 const langLabel = document.getElementById('lang-label') as HTMLElement;
 const drawer = document.getElementById('inspector-drawer') as HTMLElement;
@@ -52,16 +48,18 @@ const explodePct = document.getElementById('explode-pct') as HTMLElement;
 
 const selectedCardEl = document.getElementById('selected-card') as HTMLDivElement;
 const partListEl = document.getElementById('part-list') as HTMLDivElement;
-const pricingMainAsk = document.getElementById('pricing-main-ask') as HTMLElement;
-const pricingCloseNote = document.getElementById('pricing-close-note') as HTMLElement;
-const monitorBundleCheck = document.getElementById('monitor-bundle-check') as HTMLInputElement;
-const benchmarkBox = document.getElementById('benchmark-box') as HTMLDivElement;
-const pricingTableWrap = document.getElementById('pricing-table-wrap') as HTMLDivElement;
 const healthContent = document.getElementById('health-content') as HTMLDivElement;
-const listingPreview = document.getElementById('listing-preview') as HTMLPreElement;
-const btnCopyListing = document.getElementById('btn-copy-listing') as HTMLButtonElement;
+const fullSpecsContent = document.getElementById('full-specs-content') as HTMLDivElement;
 const btnCopySpecs = document.getElementById('btn-copy-specs') as HTMLButtonElement;
 const copyToast = document.getElementById('copy-toast') as HTMLDivElement;
+
+// Lightbox Modal Elements
+const lightbox = document.getElementById('image-lightbox') as HTMLDivElement;
+const lightboxBackdrop = document.getElementById('lightbox-backdrop') as HTMLDivElement;
+const lightboxClose = document.getElementById('lightbox-close') as HTMLButtonElement;
+const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+const lightboxTitle = document.getElementById('lightbox-title') as HTMLElement;
+const lightboxNote = document.getElementById('lightbox-note') as HTMLElement;
 
 const getPart = (id: PartId): PcPart => PC_PARTS.find((p) => p.id === id) ?? PC_PARTS[0];
 
@@ -74,7 +72,7 @@ const stage = createPcStage(canvas, {
     }
     const part = getPart(partId);
     tooltipTitle.textContent = part.shortName;
-    tooltipSub.textContent = `${part.statusTag[lang]} • ฿${part.estimateLow.toLocaleString()}–${part.estimateHigh.toLocaleString()}`;
+    tooltipSub.textContent = `${part.category[lang]} • ${part.statusTag[lang]}`;
     hoverTooltip.classList.toggle('unverified', !part.verified);
     hoverTooltip.style.left = `${clientX}px`;
     hoverTooltip.style.top = `${clientY}px`;
@@ -89,28 +87,17 @@ const stage = createPcStage(canvas, {
   },
 });
 
-function formatThb(n: number): string {
-  return `฿${n.toLocaleString('en-US')}`;
+function openLightbox(part: PcPart): void {
+  if (!part.image) return;
+  lightboxImg.src = part.image;
+  lightboxImg.alt = part.name;
+  lightboxTitle.textContent = part.name;
+  lightboxNote.textContent = part.imageCaption ? part.imageCaption[lang] : '';
+  lightbox.classList.remove('hidden');
 }
 
-function updatePriceHeader(): void {
-  const totalAsk = monitorVisible
-    ? SELLER_CONFIG.askingPriceTower + SELLER_CONFIG.monitorBundleAddon
-    : SELLER_CONFIG.askingPriceTower;
-  priceAmount.textContent = formatThb(totalAsk);
-  pricingMainAsk.textContent = formatThb(totalAsk);
-
-  const low = monitorVisible
-    ? SELLER_CONFIG.realisticLow + 3500
-    : SELLER_CONFIG.realisticLow;
-  const high = monitorVisible
-    ? SELLER_CONFIG.realisticHigh + 4200
-    : SELLER_CONFIG.realisticHigh;
-
-  pricingCloseNote.innerHTML =
-    lang === 'th'
-      ? `ราคาปิดการขายจริงที่เหมาะสม: <strong>${formatThb(low)} – ${formatThb(high)}</strong> (ตั้งเผื่อต่อรอง ~1,000–2,000 บาท ต่ำกว่าเครื่องมือหนึ่ง ฿27,000–฿29,490)`
-      : `Realistic closing range: <strong>${formatThb(low)} – ${formatThb(high)}</strong> (includes ฿1k–2k negotiation room, well below ฿27,000–฿29,490 brand-new retail).`;
+function closeLightbox(): void {
+  lightbox.classList.add('hidden');
 }
 
 function renderSpotlight(): void {
@@ -118,6 +105,22 @@ function renderSpotlight(): void {
   const part = getPart(selectedPartId);
   const badgeClass = part.verified ? 'verified' : 'unverified';
   const badgeText = part.verified ? `✓ ${part.statusTag[lang]}` : part.statusTag[lang];
+
+  const photoHtml = part.image
+    ? `
+      <div class="product-photo-box" id="spotlight-photo" title="${t.zoomHint}">
+        <img src="${part.image}" alt="${part.name}" loading="eager" />
+        <span class="zoom-pill">🔍 ${t.zoomHint}</span>
+      </div>
+      ${part.imageCaption ? `<div class="photo-caption">${part.imageCaption[lang]}</div>` : ''}
+    `
+    : `
+      <div class="no-photo-box">
+        <span class="no-photo-icon">📷</span>
+        <strong>${t.noPhotoTitle}</strong>
+        <span>${t.noPhotoSub}</span>
+      </div>
+    `;
 
   const specsHtml = part.specs
     .map(
@@ -129,17 +132,8 @@ function renderSpotlight(): void {
     )
     .join('');
 
-  const linksHtml =
-    part.links.length > 0
-      ? `<div class="link-row">${part.links
-          .map(
-            (l) =>
-              `<a class="source-link" href="${l.url}" target="_blank" rel="noopener noreferrer">↗ ${l.label}</a>`
-          )
-          .join('')}</div>`
-      : '';
-
   selectedCardEl.innerHTML = `
+    ${photoHtml}
     <div class="spotlight-head">
       <div>
         <div class="spotlight-cat">${part.category[lang]}</div>
@@ -149,32 +143,33 @@ function renderSpotlight(): void {
     </div>
     <p class="spotlight-summary">${part.summary[lang]}</p>
     <div class="spec-grid">${specsHtml}</div>
-    <div class="price-strip">
-      <div class="price-cell">
-        <span>${t.newRetail}</span>
-        <strong>${part.newPriceThb}</strong>
-      </div>
-      <div class="price-cell highlight">
-        <span>${t.partOutEst}</span>
-        <strong>${formatThb(part.estimateLow)} – ${formatThb(part.estimateHigh)}</strong>
-      </div>
-    </div>
-    ${linksHtml}
   `;
+
+  const photoBox = document.getElementById('spotlight-photo');
+  if (photoBox) {
+    photoBox.addEventListener('click', () => openLightbox(part));
+  }
 }
 
 function renderPartList(): void {
   partListEl.innerHTML = PC_PARTS.map((p) => {
     const active = p.id === selectedPartId ? 'active' : '';
     const dotClass = p.verified ? '' : 'unverified';
+    const thumbHtml = p.image
+      ? `<div class="part-thumb"><img src="${p.image}" alt="${p.shortName}" loading="lazy" /></div>`
+      : `<div class="part-thumb placeholder">📷</div>`;
+
     return `
       <button class="part-item ${active}" data-part="${p.id}" type="button">
-        <div class="part-item-left">
-          <span class="part-item-cat">${p.category[lang]}</span>
-          <span class="part-item-name">${p.shortName}</span>
+        <div class="part-item-main">
+          ${thumbHtml}
+          <div class="part-item-left">
+            <span class="part-item-cat">${p.category[lang]}</span>
+            <span class="part-item-name">${p.shortName}</span>
+          </div>
         </div>
         <div class="part-item-right">
-          <span class="part-item-price">${formatThb(p.estimateMid)}</span>
+          <span class="part-chip">${p.highlightTag}</span>
           <span class="status-dot ${dotClass}"></span>
         </div>
       </button>
@@ -187,64 +182,6 @@ function renderPartList(): void {
       selectPart(id, true);
     });
   });
-}
-
-function renderPricingTab(): void {
-  const t = I18N[lang];
-  benchmarkBox.innerHTML = `
-    <div class="section-heading">${t.benchmarksTitle}</div>
-    ${WHOLE_PC_BENCHMARKS.map(
-      (b) => `
-      <div class="bench-item">
-        <div class="bench-top">
-          <strong>[${b.tag[lang]}] ${b.title[lang]}</strong>
-          <span class="bench-price">${b.price}</span>
-        </div>
-        <div class="pricing-sub">${b.detail[lang]}</div>
-        <div class="link-row">
-          <a class="source-link" href="${b.url}" target="_blank" rel="noopener noreferrer">↗ ${
-        lang === 'th' ? 'ดูลิงก์อ้างอิง' : 'Reference Link'
-      }</a>
-        </div>
-      </div>`
-    ).join('')}
-  `;
-
-  const verifiedParts = PC_PARTS.filter((p) => p.verified && !p.optionalBundle);
-  const verifiedLow = verifiedParts.reduce((s, p) => s + p.estimateLow, 0);
-  const verifiedHigh = verifiedParts.reduce((s, p) => s + p.estimateHigh, 0);
-
-  const rowsHtml = PC_PARTS.filter((p) => !p.optionalBundle || monitorVisible)
-    .map(
-      (p) => `
-      <div class="pricing-row-card">
-        <div class="pricing-row-top">
-          <strong>${p.shortName} ${p.verified ? '' : '⚠️'}</strong>
-          <span class="est">${formatThb(p.estimateLow)} – ${formatThb(p.estimateHigh)}</span>
-        </div>
-        <div class="pricing-sub">${t.newRetail}: ${p.newPriceThb}</div>
-        ${
-          p.links.length
-            ? `<div class="link-row">${p.links
-                .map(
-                  (l) =>
-                    `<a class="source-link" href="${l.url}" target="_blank" rel="noopener noreferrer">↗ ${l.label}</a>`
-                )
-                .join('')}</div>`
-            : ''
-        }
-      </div>`
-    )
-    .join('');
-
-  pricingTableWrap.innerHTML = `
-    <div class="section-heading">${t.verifiedPartOutTitle}</div>
-    <div class="subtotal-card">
-      <span>${lang === 'th' ? 'รวมชิ้นส่วนที่ตรวจพบแล้ว (ไม่รวม PSU/เคส/ซิงค์)' : 'Verified Core Parts Subtotal'}</span>
-      <strong>${formatThb(verifiedLow)} – ${formatThb(verifiedHigh)}</strong>
-    </div>
-    ${rowsHtml}
-  `;
 }
 
 function renderHealthTab(): void {
@@ -260,8 +197,30 @@ function renderHealthTab(): void {
   ).join('');
 }
 
-function renderListingTab(): void {
-  listingPreview.textContent = buildThaiListing(monitorVisible);
+function renderFullSpecsTab(): void {
+  fullSpecsContent.innerHTML = PC_PARTS.map((p) => {
+    const thumbHtml = p.image
+      ? `<div class="full-spec-thumb"><img src="${p.image}" alt="${p.shortName}" loading="lazy" /></div>`
+      : `<div class="full-spec-thumb placeholder">📷</div>`;
+
+    return `
+      <div class="full-spec-card" data-part="${p.id}">
+        ${thumbHtml}
+        <div class="full-spec-body">
+          <span class="full-spec-cat">${p.category[lang]}</span>
+          <strong class="full-spec-name">${p.name}</strong>
+          <span class="full-spec-meta">${p.statusTag[lang]}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  fullSpecsContent.querySelectorAll<HTMLElement>('.full-spec-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.part as PartId;
+      selectPart(id, true);
+    });
+  });
 }
 
 function updateDrawerToggleLabel(): void {
@@ -272,7 +231,7 @@ function updateDrawerToggleLabel(): void {
 function applyTranslations(): void {
   const t = I18N[lang];
   headerSub.textContent = t.headerSub;
-  priceLabel.textContent = t.priceLabel;
+  statusPillText.textContent = t.statusPill;
   hintText.textContent = t.hintText;
   langLabel.textContent = lang === 'th' ? 'EN' : 'ไทย';
 
@@ -283,7 +242,6 @@ function applyTranslations(): void {
     }
   });
 
-  // Dynamic button labels
   const glassTextEl = btnGlass.querySelector<HTMLElement>('[data-i18n="glassBtn"]');
   if (glassTextEl) glassTextEl.textContent = glassOpen ? t.glassBtnClosed : t.glassBtn;
 
@@ -291,12 +249,10 @@ function applyTranslations(): void {
   if (coolerTextEl) coolerTextEl.textContent = coolerHidden ? t.coolerBtnShow : t.coolerBtn;
 
   updateDrawerToggleLabel();
-  updatePriceHeader();
   renderSpotlight();
   renderPartList();
-  renderPricingTab();
   renderHealthTab();
-  renderListingTab();
+  renderFullSpecsTab();
 }
 
 function selectPart(partId: PartId, flyCamera: boolean): void {
@@ -307,7 +263,6 @@ function selectPart(partId: PartId, flyCamera: boolean): void {
     setMonitorState(true);
   }
   if (partId === 'cpu' && !coolerHidden && explodeValue < 0.3) {
-    // Automatically hide cooler slightly or explode so buyer actually sees the i5-14400F!
     coolerHidden = true;
     stage.rig.setCoolerHidden(true);
     btnCooler.classList.add('active');
@@ -319,7 +274,6 @@ function selectPart(partId: PartId, flyCamera: boolean): void {
     stage.flyTo(part.cameraPos, part.cameraTarget);
   }
 
-  // Switch to inspect tab so buyer immediately sees details
   activateTab('inspect');
   renderSpotlight();
   renderPartList();
@@ -337,10 +291,6 @@ function setMonitorState(visible: boolean): void {
   monitorVisible = visible;
   stage.rig.setMonitorVisible(visible);
   btnMonitor.classList.toggle('active', visible);
-  monitorBundleCheck.checked = visible;
-  updatePriceHeader();
-  renderPricingTab();
-  renderListingTab();
 }
 
 function activateTab(tabName: string): void {
@@ -416,11 +366,6 @@ btnMonitor.addEventListener('click', () => {
   stage.resetCamera(monitorVisible);
 });
 
-monitorBundleCheck.addEventListener('change', () => {
-  setMonitorState(monitorBundleCheck.checked);
-  stage.resetCamera(monitorVisible);
-});
-
 btnRgb.addEventListener('click', () => {
   rgbIdx = (rgbIdx + 1) % rgbModes.length;
   const mode = rgbModes[rgbIdx];
@@ -439,12 +384,14 @@ btnReset.addEventListener('click', () => {
   stage.resetCamera(monitorVisible);
 });
 
-btnCopyListing.addEventListener('click', () => {
-  void copyText(buildThaiListing(monitorVisible));
-});
-
 btnCopySpecs.addEventListener('click', () => {
   void copyText(buildShortSpecs(monitorVisible));
+});
+
+lightboxClose.addEventListener('click', closeLightbox);
+lightboxBackdrop.addEventListener('click', closeLightbox);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
 });
 
 // Initial Render

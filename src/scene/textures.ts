@@ -308,6 +308,6 @@ export function createMonitorScreenTexture(): THREE.CanvasTexture {
     ctx.fillRect(0, h - 38, w, 38);
     ctx.fillStyle = '#64748b';
     ctx.font = '14px JetBrains Mono, monospace';
-    ctx.fillText('Windows 11 Pro • DirectX 12_2 • Uptime 7.7 Days • Optional Monitor Bundle (+฿3,800)', 44, h - 14);
+    ctx.fillText('Windows 11 Pro • DirectX 12_2 • Uptime 7.7 Days • Optional 30" Curved 200Hz Monitor', 44, h - 14);
   });
 }
