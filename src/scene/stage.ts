@@ -31,10 +31,10 @@ export function createPcStage(canvas: HTMLCanvasElement, callbacks: StageCallbac
 
   const scene = new THREE.Scene();
 
-  // Studio PBR Environment reflections
+  // Studio PBR Environment reflections (neutral daylight gallery)
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.7;
+  scene.environmentIntensity = 0.82;
 
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
   camera.position.set(2.9, 0.72, 3.35);
@@ -47,9 +47,12 @@ export function createPcStage(canvas: HTMLCanvasElement, callbacks: StageCallbac
   controls.maxPolarAngle = Math.PI * 0.54;
   controls.target.set(0, -0.05, 0);
 
-  // Three-point Studio Lighting
-  const keyLight = new THREE.DirectionalLight(0xeef6ff, 1.9);
-  keyLight.position.set(4.5, 6.2, 5.2);
+  // Neutral Daylight Studio Lighting (no neon tints)
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe7e5e0, 0.85);
+  scene.add(hemiLight);
+
+  const keyLight = new THREE.DirectionalLight(0xfffdf9, 1.85);
+  keyLight.position.set(4.5, 6.8, 5.4);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(1024, 1024);
   keyLight.shadow.camera.near = 1;
@@ -61,30 +64,19 @@ export function createPcStage(canvas: HTMLCanvasElement, callbacks: StageCallbac
   keyLight.shadow.bias = -0.0005;
   scene.add(keyLight);
 
-  const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.05);
-  rimLight.position.set(-4.5, 2.5, -3.5);
-  scene.add(rimLight);
-
-  const fillLight = new THREE.PointLight(0x60a5fa, 0.85, 8);
-  fillLight.position.set(0.6, 0.2, 1.6);
+  const fillLight = new THREE.DirectionalLight(0xf1f5f9, 0.75);
+  fillLight.position.set(-4.5, 3.0, -3.0);
   scene.add(fillLight);
 
-  // Subtle Dark Showroom Floor + Circular Pedestal Grid
-  const floorGeo = new THREE.CircleGeometry(7.5, 64);
-  const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x090e19,
-    roughness: 0.78,
-    metalness: 0.25,
-  });
-  const floor = new THREE.Mesh(floorGeo, floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -1.38;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  const grid = new THREE.GridHelper(10, 24, 0x1e3a5f, 0x111c2f);
-  grid.position.y = -1.375;
-  scene.add(grid);
+  // Clean Matte Architectural Shadow Catcher Floor (no Tron grid)
+  const shadowFloor = new THREE.Mesh(
+    new THREE.CircleGeometry(8, 64),
+    new THREE.ShadowMaterial({ opacity: 0.16 })
+  );
+  shadowFloor.rotation.x = -Math.PI / 2;
+  shadowFloor.position.y = -1.378;
+  shadowFloor.receiveShadow = true;
+  scene.add(shadowFloor);
 
   // Build 3D PC Rig
   const rig = createPcRig();

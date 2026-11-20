@@ -113,7 +113,7 @@ export function createPcRig(): PcRigController {
   let explodeTarget = 0;
   let explodeCurrent = 0;
   let coolerHidden = false;
-  let rgbMode: RgbMode = 'cyan';
+  let rgbMode: RgbMode = 'white';
   let activeHighlightPart: PartId | null = null;
   let activeSelectedPart: PartId | null = 'gpu';
 
@@ -710,11 +710,11 @@ export function createPcRig(): PcRigController {
           const std = m as THREE.MeshStandardMaterial;
           if (!std.emissive || rgbMaterials.includes(std) || std === screenMat) continue;
           if (isHovered) {
-            std.emissive.setHex(0x38bdf8);
-            std.emissiveIntensity = 0.28;
-          } else if (isSelected && partId !== 'case') {
-            std.emissive.setHex(0x0ea5e9);
+            std.emissive.setHex(0xffffff);
             std.emissiveIntensity = 0.16;
+          } else if (isSelected && partId !== 'case') {
+            std.emissive.setHex(0xe2e8f0);
+            std.emissiveIntensity = 0.09;
           } else {
             std.emissive.setHex(0x000000);
             std.emissiveIntensity = 0;

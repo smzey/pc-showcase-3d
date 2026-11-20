@@ -253,61 +253,53 @@ export function createPsuStickerTexture(): THREE.CanvasTexture {
 export function createMonitorScreenTexture(): THREE.CanvasTexture {
   return createCanvasTexture(1024, 432, (ctx, w, h) => {
     const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, '#071326');
-    grad.addColorStop(0.55, '#0c1f3a');
-    grad.addColorStop(1, '#09111f');
+    grad.addColorStop(0, '#f8fafc');
+    grad.addColorStop(1, '#ecece7');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Subtle glowing orb
-    const rad = ctx.createRadialGradient(w * 0.72, h * 0.35, 20, w * 0.72, h * 0.35, 320);
-    rad.addColorStop(0, 'rgba(56, 189, 248, 0.28)');
-    rad.addColorStop(1, 'rgba(56, 189, 248, 0)');
-    ctx.fillStyle = rad;
-    ctx.fillRect(0, 0, w, h);
-
     // Header
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 20px JetBrains Mono, monospace';
-    ctx.fillText('DAHUA LM30-E330CA • 30" CURVED WFHD • 2560 × 1080 @ 200Hz', 44, 58);
+    ctx.fillStyle = '#52525b';
+    ctx.font = '600 18px Inter, sans-serif';
+    ctx.fillText('DAHUA LM30-E330CA  ·  30" CURVED WFHD  ·  2560 × 1080 @ 200Hz', 48, 62);
 
     // Title
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 44px Inter, sans-serif';
-    ctx.fillText('SYSTEM HEALTHY • READY TO PLAY', 44, 132);
+    ctx.fillStyle = '#18181b';
+    ctx.font = 'bold 42px Inter, sans-serif';
+    ctx.fillText('Hardware Verified · Ready to Test', 48, 128);
 
-    // Cards
+    // Minimalist Cards
     const cards = [
-      { k: 'CPU', v: 'i5-14400F', s: '10C / 16T • 0 BSODs', c: '#38bdf8' },
-      { k: 'GPU', v: 'RTX 5060 8GB', s: 'ASUS • 45°C Idle', c: '#22c55e' },
-      { k: 'MEMORY', v: '32GB DDR4', s: '4×8GB HyperX Fury', c: '#a855f7' },
-      { k: 'STORAGE', v: '2.25 TB', s: '2× NVMe + 1TB HDD', c: '#f59e0b' },
+      { k: 'PROCESSOR', v: 'i5-14400F', s: '10 Cores / 16 Threads', c: '#18181b' },
+      { k: 'GRAPHICS', v: 'RTX 5060 8GB', s: 'ASUS · 45°C Idle', c: '#15803d' },
+      { k: 'MEMORY', v: '32GB DDR4', s: '4×8GB HyperX Fury', c: '#18181b' },
+      { k: 'STORAGE', v: '2.25 TB Total', s: '2× NVMe + 1TB HDD', c: '#18181b' },
     ];
     cards.forEach((card, idx) => {
-      const x = 44 + idx * 238;
-      const y = 186;
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
-      ctx.fillRect(x, y, 218, 170);
-      ctx.strokeStyle = card.c;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(x, y, 218, 170);
+      const x = 48 + idx * 236;
+      const y = 182;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, 216, 168);
+      ctx.strokeStyle = '#e4e4df';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, 216, 168);
 
-      ctx.fillStyle = card.c;
-      ctx.font = 'bold 16px JetBrains Mono, monospace';
+      ctx.fillStyle = '#71717a';
+      ctx.font = '600 14px Inter, sans-serif';
       ctx.fillText(card.k, x + 18, y + 36);
-      ctx.fillStyle = '#f8fafc';
+      ctx.fillStyle = card.c;
       ctx.font = 'bold 26px Inter, sans-serif';
       ctx.fillText(card.v, x + 18, y + 92);
-      ctx.fillStyle = '#94a3b8';
+      ctx.fillStyle = '#52525b';
       ctx.font = '15px Inter, sans-serif';
-      ctx.fillText(card.s, x + 18, y + 136);
+      ctx.fillText(card.s, x + 18, y + 134);
     });
 
-    // Bottom taskbar
-    ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+    // Bottom bar
+    ctx.fillStyle = '#18181b';
     ctx.fillRect(0, h - 38, w, 38);
-    ctx.fillStyle = '#64748b';
-    ctx.font = '14px JetBrains Mono, monospace';
-    ctx.fillText('Windows 11 Pro • DirectX 12_2 • Uptime 7.7 Days • Optional 30" Curved 200Hz Monitor', 44, h - 14);
+    ctx.fillStyle = '#d4d4d8';
+    ctx.font = '14px Inter, sans-serif';
+    ctx.fillText('Windows 11 Pro · DirectX 12 · 0 BSODs · Optional 30" Curved 200Hz Monitor', 48, h - 14);
   });
 }

@@ -3,25 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>3D PC Buyer Inspector — i5-14400F • ASUS RTX 5060 8GB • 32GB RAM</title>
+    <title>PC Showcase — Intel i5-14400F • ASUS RTX 5060 8GB</title>
     <meta
       name="description"
-      content="ตรวจเช็กสเปกคอมเกมมิ่งแบบ 3 มิติ หมุนดูชิ้นส่วน แยกชิ้นส่วน ดูรูปสินค้าจริงและผลตรวจเช็กเครื่อง (Intel i5-14400F / ASUS RTX 5060 8GB / 32GB RAM / 2.25TB Storage)"
+      content="รายละเอียดคอมพิวเตอร์มือสองพร้อมภาพชิ้นส่วนและโมเดล 3 มิติ Intel Core i5-14400F, ASUS RTX 5060 8GB, RAM 32GB, SSD 1.25TB + HDD 1TB"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Prompt:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Prompt:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
     <div id="app">
-      <!-- 3D Canvas Stage -->
+      <!-- 3D Studio Stage -->
       <main class="stage-wrap">
         <canvas id="pc-canvas" aria-label="Interactive 3D PC Model"></canvas>
 
-        <!-- Hover Tooltip -->
+        <!-- Minimal Hover Tooltip -->
         <div id="hover-tooltip" class="hover-tooltip hidden" role="status" aria-live="polite">
           <span class="tooltip-dot"></span>
           <div class="tooltip-text">
@@ -30,101 +30,109 @@
           </div>
         </div>
 
-        <!-- Top Floating Header -->
+        <!-- Clean Top Header -->
         <header class="top-bar">
-          <div class="brand-pill">
-            <div class="brand-badge">3D INSPECT</div>
-            <div class="brand-titles">
-              <h1 id="header-title">i5-14400F • ASUS RTX 5060 8GB</h1>
-              <p id="header-sub">RAM 32GB • NVMe 1.25TB + HDD 1TB • คลิกดูรูปและสเปกจริงทุกชิ้น</p>
-            </div>
+          <div class="brand-header">
+            <h1 id="header-title">Intel i5-14400F · ASUS RTX 5060 8GB</h1>
+            <p id="header-sub">RAM 32GB · ความจุรวม 2.25TB · คลิกชิ้นส่วนในเครื่องเพื่อดูรายละเอียด</p>
           </div>
 
           <div class="top-actions">
             <div class="status-pill" id="status-pill">
               <span class="status-live-dot"></span>
-              <span id="status-pill-text">พร้อมเทสก่อนรับ</span>
+              <span id="status-pill-text">พร้อมนัดรับและเทสเครื่อง</span>
             </div>
             <button id="lang-toggle" class="icon-btn" type="button" title="Switch Thai / English">
               <span id="lang-label">EN</span>
             </button>
             <button id="drawer-toggle" class="icon-btn mobile-only" type="button" aria-label="Toggle Inspector">
-              <span id="drawer-toggle-label">ดูสเปก</span>
+              <span id="drawer-toggle-label">รายละเอียด</span>
             </button>
           </div>
         </header>
 
-        <!-- Hint Banner -->
-        <div class="hint-chip" id="hint-chip">
-          <span class="pulse-dot"></span>
-          <span id="hint-text">ลากเพื่อหมุน • ซูมเข้าออก • คลิกชิ้นส่วนในเครื่องเพื่อดูรูปสินค้าจริงและสเปก</span>
-        </div>
-
-        <!-- Bottom Floating 3D Control Dock -->
+        <!-- Minimal Floating Control Dock -->
         <div class="controls-dock" role="toolbar" aria-label="3D View Controls">
           <div class="dock-row">
             <button id="btn-glass" class="dock-btn active" type="button">
-              <span class="btn-icon">🪟</span>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <path d="M9 4v16" />
+              </svg>
               <span data-i18n="glassBtn">ปิดฝาข้าง</span>
             </button>
             <button id="btn-explode" class="dock-btn" type="button">
-              <span class="btn-icon">💥</span>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+                <path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" />
+              </svg>
               <span data-i18n="explodeBtn">แยกชิ้นส่วน</span>
             </button>
             <button id="btn-cooler" class="dock-btn" type="button">
-              <span class="btn-icon">❄️</span>
-              <span data-i18n="coolerBtn">ซ่อนซิงค์ CPU</span>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+                <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" />
+              </svg>
+              <span data-i18n="coolerBtn">ซ่อนพัดลม CPU</span>
             </button>
             <button id="btn-monitor" class="dock-btn" type="button">
-              <span class="btn-icon">🖥️</span>
-              <span data-i18n="monitorBtn">ดูพร้อมจอ 30"</span>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <rect x="2" y="4" width="20" height="13" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+              <span data-i18n="monitorBtn">จอ 30"</span>
             </button>
             <button id="btn-rgb" class="dock-btn" type="button">
-              <span class="btn-icon">✨</span>
-              <span id="rgb-label">RGB: Cyan</span>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+              <span id="rgb-label">ไฟ: ขาว</span>
             </button>
             <button id="btn-reset" class="dock-btn" type="button">
-              <span class="btn-icon">↺</span>
-              <span data-i18n="resetBtn">รีเซ็ตมุมมอง</span>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              <span data-i18n="resetBtn">รีเซ็ต</span>
             </button>
           </div>
 
           <div class="explode-slider-row">
-            <label for="explode-range" data-i18n="explodeSlider">ระยะแยกชิ้นส่วน (Exploded View)</label>
+            <label for="explode-range" data-i18n="explodeSlider">แยกชิ้นส่วน</label>
             <input id="explode-range" type="range" min="0" max="100" value="0" />
-            <span id="explode-pct" class="mono">0%</span>
+            <span id="explode-pct" class="pct-val">0%</span>
           </div>
         </div>
       </main>
 
-      <!-- Right Buyer Inspector Drawer -->
+      <!-- Right Minimalist Inspector Panel -->
       <aside id="inspector-drawer" class="inspector-drawer">
-        <!-- Tabs (Buyer-focused: No Pricing) -->
         <nav class="drawer-tabs" role="tablist">
           <button class="tab-btn active" data-tab="inspect" role="tab" aria-selected="true" data-i18n="tabInspect">
-            ชิ้นส่วน & รูป
+            ชิ้นส่วน
           </button>
           <button class="tab-btn" data-tab="health" role="tab" aria-selected="false" data-i18n="tabHealth">
-            ผลตรวจเช็ก
+            สภาพเครื่อง
           </button>
           <button class="tab-btn" data-tab="specs" role="tab" aria-selected="false" data-i18n="tabSpecs">
-            สเปกทั้งหมด
+            สเปกรวม
           </button>
         </nav>
 
-        <!-- TAB 1: INSPECT WITH PRODUCT IMAGE -->
+        <!-- TAB 1: COMPONENT PHOTO & DETAILS -->
         <section id="tab-inspect" class="tab-panel active">
           <div id="selected-card" class="spotlight-card"></div>
 
           <div class="legend-row">
-            <span class="badge verified" data-i18n="badgeVerified">✓ ตรวจจากระบบจริง</span>
-            <span class="badge unverified" data-i18n="badgeUnverified">⚠ สอบถามรูปจริงจากผู้ขาย</span>
+            <span class="legend-item"><i class="dot verified"></i><span data-i18n="badgeVerified">ยืนยันจากเครื่องจริง</span></span>
+            <span class="legend-item"><i class="dot unverified"></i><span data-i18n="badgeUnverified">สอบถามรูปจริงจากผู้ขาย</span></span>
           </div>
 
           <div id="part-list" class="part-list"></div>
         </section>
 
-        <!-- TAB 2: HEALTH & DIAGNOSTICS -->
+        <!-- TAB 2: HEALTH & CONDITION -->
         <section id="tab-health" class="tab-panel">
           <div id="health-content"></div>
         </section>
@@ -133,7 +141,7 @@
         <section id="tab-specs" class="tab-panel">
           <div class="spec-sheet-header">
             <button id="btn-copy-specs" class="primary-btn" type="button" data-i18n="copySpecsBtn">
-              📋 คัดลอกสเปกทั้งหมด
+              คัดลอกสเปกทั้งหมด
             </button>
           </div>
           <div id="copy-toast" class="copy-toast hidden"></div>
@@ -142,11 +150,15 @@
       </aside>
     </div>
 
-    <!-- Product Image Fullscreen Lightbox -->
+    <!-- Clean Product Image Lightbox -->
     <div id="image-lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Product image zoom">
       <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
       <div class="lightbox-card">
-        <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close">✕</button>
+        <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
         <div class="lightbox-img-wrap">
           <img id="lightbox-img" src="" alt="" />
         </div>

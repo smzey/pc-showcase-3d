@@ -18,7 +18,7 @@ let glassOpen = true;
 let coolerHidden = false;
 let monitorVisible = false;
 let explodeValue = 0;
-const rgbModes: RgbMode[] = ['cyan', 'white', 'rainbow', 'off'];
+const rgbModes: RgbMode[] = ['white', 'off', 'cyan', 'rainbow'];
 let rgbIdx = 0;
 
 // DOM Elements
@@ -34,7 +34,6 @@ const langLabel = document.getElementById('lang-label') as HTMLElement;
 const drawer = document.getElementById('inspector-drawer') as HTMLElement;
 const drawerToggle = document.getElementById('drawer-toggle') as HTMLButtonElement;
 const drawerToggleLabel = document.getElementById('drawer-toggle-label') as HTMLElement;
-const hintText = document.getElementById('hint-text') as HTMLElement;
 
 const btnGlass = document.getElementById('btn-glass') as HTMLButtonElement;
 const btnExplode = document.getElementById('btn-explode') as HTMLButtonElement;
@@ -100,23 +99,26 @@ function closeLightbox(): void {
   lightbox.classList.add('hidden');
 }
 
+const CAM_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+const ZOOM_SVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>`;
+
 function renderSpotlight(): void {
   const t = I18N[lang];
   const part = getPart(selectedPartId);
   const badgeClass = part.verified ? 'verified' : 'unverified';
-  const badgeText = part.verified ? `✓ ${part.statusTag[lang]}` : part.statusTag[lang];
+  const badgeText = part.statusTag[lang].replace(/^⚠\s*/, '');
 
   const photoHtml = part.image
     ? `
       <div class="product-photo-box" id="spotlight-photo" title="${t.zoomHint}">
         <img src="${part.image}" alt="${part.name}" loading="eager" />
-        <span class="zoom-pill">🔍 ${t.zoomHint}</span>
+        <span class="zoom-pill">${ZOOM_SVG} ${t.zoomHint}</span>
       </div>
       ${part.imageCaption ? `<div class="photo-caption">${part.imageCaption[lang]}</div>` : ''}
     `
     : `
       <div class="no-photo-box">
-        <span class="no-photo-icon">📷</span>
+        ${CAM_SVG}
         <strong>${t.noPhotoTitle}</strong>
         <span>${t.noPhotoSub}</span>
       </div>
@@ -157,7 +159,7 @@ function renderPartList(): void {
     const dotClass = p.verified ? '' : 'unverified';
     const thumbHtml = p.image
       ? `<div class="part-thumb"><img src="${p.image}" alt="${p.shortName}" loading="lazy" /></div>`
-      : `<div class="part-thumb placeholder">📷</div>`;
+      : `<div class="part-thumb placeholder">${CAM_SVG}</div>`;
 
     return `
       <button class="part-item ${active}" data-part="${p.id}" type="button">
@@ -201,7 +203,7 @@ function renderFullSpecsTab(): void {
   fullSpecsContent.innerHTML = PC_PARTS.map((p) => {
     const thumbHtml = p.image
       ? `<div class="full-spec-thumb"><img src="${p.image}" alt="${p.shortName}" loading="lazy" /></div>`
-      : `<div class="full-spec-thumb placeholder">📷</div>`;
+      : `<div class="full-spec-thumb placeholder">${CAM_SVG}</div>`;
 
     return `
       <div class="full-spec-card" data-part="${p.id}">
@@ -209,7 +211,7 @@ function renderFullSpecsTab(): void {
         <div class="full-spec-body">
           <span class="full-spec-cat">${p.category[lang]}</span>
           <strong class="full-spec-name">${p.name}</strong>
-          <span class="full-spec-meta">${p.statusTag[lang]}</span>
+          <span class="full-spec-meta">${p.statusTag[lang].replace(/^⚠\s*/, '')}</span>
         </div>
       </div>
     `;
@@ -228,11 +230,21 @@ function updateDrawerToggleLabel(): void {
   drawerToggleLabel.textContent = drawer.classList.contains('open') ? t.drawerClose : t.drawerOpen;
 }
 
+function updateRgbLabel(): void {
+  const mode = rgbModes[rgbIdx];
+  const labelMap: Record<RgbMode, { th: string; en: string }> = {
+    white: { th: 'ไฟ: ขาว', en: 'LED: White' },
+    off: { th: 'ไฟ: ปิด', en: 'LED: Off' },
+    cyan: { th: 'ไฟ: ฟ้า', en: 'LED: Cyan' },
+    rainbow: { th: 'ไฟ: RGB', en: 'LED: RGB' },
+  };
+  rgbLabel.textContent = labelMap[mode][lang];
+}
+
 function applyTranslations(): void {
   const t = I18N[lang];
   headerSub.textContent = t.headerSub;
   statusPillText.textContent = t.statusPill;
-  hintText.textContent = t.hintText;
   langLabel.textContent = lang === 'th' ? 'EN' : 'ไทย';
 
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
@@ -248,6 +260,7 @@ function applyTranslations(): void {
   const coolerTextEl = btnCooler.querySelector<HTMLElement>('[data-i18n="coolerBtn"]');
   if (coolerTextEl) coolerTextEl.textContent = coolerHidden ? t.coolerBtnShow : t.coolerBtn;
 
+  updateRgbLabel();
   updateDrawerToggleLabel();
   renderSpotlight();
   renderPartList();
@@ -368,15 +381,8 @@ btnMonitor.addEventListener('click', () => {
 
 btnRgb.addEventListener('click', () => {
   rgbIdx = (rgbIdx + 1) % rgbModes.length;
-  const mode = rgbModes[rgbIdx];
-  stage.rig.setRgbMode(mode);
-  const labelMap: Record<RgbMode, string> = {
-    cyan: 'RGB: Cyan',
-    white: 'RGB: White',
-    rainbow: 'RGB: Cycle',
-    off: 'RGB: Off',
-  };
-  rgbLabel.textContent = labelMap[mode];
+  stage.rig.setRgbMode(rgbModes[rgbIdx]);
+  updateRgbLabel();
 });
 
 btnReset.addEventListener('click', () => {
