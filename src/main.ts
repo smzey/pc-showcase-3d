@@ -134,6 +134,14 @@ function renderSpotlight(): void {
     )
     .join('');
 
+  const w = part.warranty;
+  const warrantyClass =
+    w.status === 'active' || w.status === 'lifetime'
+      ? 'verified'
+      : w.status === 'expired'
+      ? 'expired'
+      : 'unverified';
+
   selectedCardEl.innerHTML = `
     ${photoHtml}
     <div class="spotlight-head">
@@ -145,6 +153,13 @@ function renderSpotlight(): void {
     </div>
     <p class="spotlight-summary">${part.summary[lang]}</p>
     <div class="spec-grid">${specsHtml}</div>
+    <div class="warranty-inline">
+      <div class="warranty-inline-left">
+        <span class="warranty-k">${t.warrantyLabel}</span>
+        <span class="warranty-dist">${w.distributor}</span>
+      </div>
+      <span class="badge ${warrantyClass}">${w.until[lang]}</span>
+    </div>
   `;
 
   const photoBox = document.getElementById('spotlight-photo');
@@ -187,7 +202,29 @@ function renderPartList(): void {
 }
 
 function renderHealthTab(): void {
-  healthContent.innerHTML = DIAGNOSTIC_METRICS.map(
+  const t = I18N[lang];
+
+  const warrantyRows = PC_PARTS.map((p) => {
+    const w = p.warranty;
+    const badgeClass =
+      w.status === 'active' || w.status === 'lifetime'
+        ? 'verified'
+        : w.status === 'expired'
+        ? 'expired'
+        : 'unverified';
+
+    return `
+      <button class="warranty-row" data-part="${p.id}" type="button">
+        <div class="warranty-row-left">
+          <strong>${p.shortName}</strong>
+          <span>${w.distributor}</span>
+        </div>
+        <span class="badge ${badgeClass}">${w.until[lang]}</span>
+      </button>
+    `;
+  }).join('');
+
+  const healthCards = DIAGNOSTIC_METRICS.map(
     (m) => `
     <div class="health-card ${m.status}">
       <div class="health-top">
@@ -197,6 +234,20 @@ function renderHealthTab(): void {
       <p class="health-note">${m.note[lang]}</p>
     </div>`
   ).join('');
+
+  healthContent.innerHTML = `
+    <div class="section-heading">${t.warrantySectionTitle}</div>
+    <div class="warranty-table">${warrantyRows}</div>
+    <div class="section-heading" style="margin-top: 14px;">${t.healthSectionTitle}</div>
+    ${healthCards}
+  `;
+
+  healthContent.querySelectorAll<HTMLButtonElement>('.warranty-row').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.part as PartId;
+      selectPart(id, true);
+    });
+  });
 }
 
 function renderFullSpecsTab(): void {

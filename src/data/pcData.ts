@@ -13,6 +13,15 @@ export type PartId =
   | 'case'
   | 'monitor';
 
+export type WarrantyStatus = 'active' | 'lifetime' | 'expired' | 'pending';
+
+export interface WarrantyInfo {
+  status: WarrantyStatus;
+  distributor: string;
+  until: { th: string; en: string };
+  note?: { th: string; en: string };
+}
+
 export interface PcPart {
   id: PartId;
   category: { th: string; en: string };
@@ -26,9 +35,74 @@ export interface PcPart {
   statusTag: { th: string; en: string };
   summary: { th: string; en: string };
   specs: { label: { th: string; en: string }; value: string }[];
+  warranty: WarrantyInfo;
   cameraPos: [number, number, number];
   cameraTarget: [number, number, number];
 }
+
+/**
+ * Editable Warranty Table — Update distributor & expiry date after checking your boxes/receipts/S/N.
+ * status: 'active' (green) | 'lifetime' (green LT) | 'expired' (gray) | 'pending' (neutral/amber)
+ */
+export const WARRANTY_CONFIG: Record<PartId, WarrantyInfo> = {
+  gpu: {
+    status: 'pending',
+    distributor: 'ศูนย์ไทย (รอตรวจวอยด์/S/N)',
+    until: { th: 'รอผู้ขายยืนยันวันหมดประกัน', en: 'Pending seller verification' },
+    note: { th: 'เช็คจาก S/N หลังการ์ดจอหรือใบเสร็จ', en: 'Verify from backplate S/N or receipt' },
+  },
+  cpu: {
+    status: 'pending',
+    distributor: 'ศูนย์ไทย (รอตรวจกล่อง/ใบเสร็จ)',
+    until: { th: 'รอผู้ขายยืนยันวันหมดประกัน', en: 'Pending seller verification' },
+  },
+  motherboard: {
+    status: 'pending',
+    distributor: 'ศูนย์ไทย (รอตรวจวอยด์/S/N)',
+    until: { th: 'รอผู้ขายยืนยันวันหมดประกัน', en: 'Pending seller verification' },
+  },
+  ram: {
+    status: 'lifetime',
+    distributor: 'Kingston ศูนย์ไทย (ตรวจวอยด์บนแถว)',
+    until: { th: 'Lifetime (LT)', en: 'Lifetime (LT)' },
+    note: { th: 'ประกันตลอดอายุการใช้งานหากวอยด์ศูนย์ครบ', en: 'Lifetime warranty with intact distributor sticker' },
+  },
+  ssd_sn5000: {
+    status: 'pending',
+    distributor: 'WD ศูนย์ไทย (ประกันปกติ 5 ปี)',
+    until: { th: 'รอผู้ขายยืนยันวันหมดประกัน', en: 'Pending seller verification' },
+  },
+  ssd_sn750: {
+    status: 'pending',
+    distributor: 'WD ศูนย์ไทย',
+    until: { th: 'รอผู้ขายยืนยันวันหมดประกัน', en: 'Pending seller verification' },
+  },
+  hdd: {
+    status: 'pending',
+    distributor: 'Seagate (S/N: ZN1LQ3VG)',
+    until: { th: 'รอผู้ขายยืนยัน / คาดว่าหมดประกันแล้ว', en: 'Pending / likely expired' },
+  },
+  psu: {
+    status: 'pending',
+    distributor: 'รอตรวจรุ่นและวอยด์จริง',
+    until: { th: 'สอบถามผู้ขายทางแชท', en: 'Ask seller via chat' },
+  },
+  cooler: {
+    status: 'pending',
+    distributor: 'รอตรวจรุ่นจริง',
+    until: { th: 'สอบถามผู้ขายทางแชท', en: 'Ask seller via chat' },
+  },
+  case: {
+    status: 'pending',
+    distributor: 'รอตรวจรุ่นจริง',
+    until: { th: 'สอบถามผู้ขายทางแชท', en: 'Ask seller via chat' },
+  },
+  monitor: {
+    status: 'pending',
+    distributor: 'Dahua ศูนย์ไทย (ผลิต มี.ค. 2023)',
+    until: { th: 'รอตรวจตามใบเสร็จ (ปกติ 3 ปี)', en: 'Verify via receipt (3Y standard)' },
+  },
+};
 
 /**
  * Editable Seller Info (No prices shown to buyers here — manage pricing in your Marketplace post/chat).
@@ -68,6 +142,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'อุณหภูมิ / พัดลม Idle', en: 'Idle Telemetry' }, value: '45–50°C • ~20W • 0% Fan (0dB Stop OK)' },
       { label: { th: 'ไดรเวอร์ปัจจุบัน', en: 'Driver' }, value: 'NVIDIA 621.14 (2026-10-27) • WDDM 3.2' },
     ],
+    warranty: WARRANTY_CONFIG.gpu,
     cameraPos: [2.2, 0.2, 2.3],
     cameraTarget: [0.05, -0.15, 0.05],
   },
@@ -94,6 +169,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'ซ็อกเก็ต', en: 'Socket' }, value: 'LGA 1700 (U3E1) • F-Series' },
       { label: { th: 'เสถียรภาพ', en: 'Stability' }, value: 'Passed check • 0 BSODs / 7.7d uptime' },
     ],
+    warranty: WARRANTY_CONFIG.cpu,
     cameraPos: [1.85, 0.72, 1.5],
     cameraTarget: [-0.08, 0.52, -0.25],
   },
@@ -120,6 +196,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'เครือข่าย / เสียง', en: 'Network / Audio' }, value: 'Realtek 1Gbps LAN (No Wi-Fi/BT) • Realtek HD Audio' },
       { label: { th: 'สล็อตจัดเก็บข้อมูล', en: 'Storage Slots' }, value: '2× M.2 NVMe (ทั้ง 2 ช่องใช้งานอยู่) + SATA' },
     ],
+    warranty: WARRANTY_CONFIG.motherboard,
     cameraPos: [2.4, 0.55, 2.2],
     cameraTarget: [-0.05, 0.22, -0.3],
   },
@@ -145,6 +222,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'รหัสรุ่น', en: 'Part Number' }, value: 'Kingston KHX2666C16/8G (4× matching)' },
       { label: { th: 'ความเร็ว / ไฟเลี้ยง', en: 'Speed / Voltage' }, value: '2666 MHz Rated • Active 2933 MHz @ 1.35V' },
     ],
+    warranty: WARRANTY_CONFIG.ram,
     cameraPos: [1.75, 0.72, 1.55],
     cameraTarget: [0.34, 0.5, -0.25],
   },
@@ -170,6 +248,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'อินเทอร์เฟซ', en: 'Interface' }, value: 'M.2 2280 NVMe PCIe Gen4 x4' },
       { label: { th: 'สถานะสุขภาพ', en: 'Health Status' }, value: 'Healthy / OK (0 Event Log Errors)' },
     ],
+    warranty: WARRANTY_CONFIG.ssd_sn5000,
     cameraPos: [1.85, -0.32, 1.8],
     cameraTarget: [-0.02, -0.38, -0.25],
   },
@@ -195,6 +274,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'อินเทอร์เฟซ', en: 'Interface' }, value: 'M.2 2280 NVMe PCIe Gen3 x4 (Boot / System)' },
       { label: { th: 'สถานะสุขภาพ', en: 'Health Status' }, value: 'Healthy / OK (0 Event Log Errors)' },
     ],
+    warranty: WARRANTY_CONFIG.ssd_sn750,
     cameraPos: [1.75, 0.25, 1.65],
     cameraTarget: [-0.05, 0.14, -0.25],
   },
@@ -220,6 +300,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'อินเทอร์เฟซ', en: 'Interface' }, value: 'SATA 6Gb/s • 3.5-inch • 7200 RPM' },
       { label: { th: 'สถานะสุขภาพ', en: 'Health Status' }, value: 'Healthy / OK (0 Event Log Errors)' },
     ],
+    warranty: WARRANTY_CONFIG.hdd,
     cameraPos: [2.1, -0.95, 2.0],
     cameraTarget: [0.45, -1.02, 0.0],
   },
@@ -239,6 +320,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'สถานะการตรวจ', en: 'Verification' }, value: SELLER_INFO.psuNote.en },
       { label: { th: 'เสถียรภาพไฟเลี้ยง', en: 'Power Stability' }, value: '0 Kernel-Power 41 unexpected shutdowns (90d)' },
     ],
+    warranty: WARRANTY_CONFIG.psu,
     cameraPos: [-1.8, -0.9, 2.3],
     cameraTarget: [-0.45, -1.02, 0.0],
   },
@@ -257,6 +339,7 @@ export const PC_PARTS: PcPart[] = [
     specs: [
       { label: { th: 'สถานะการตรวจ', en: 'Verification' }, value: SELLER_INFO.coolerNote.en },
     ],
+    warranty: WARRANTY_CONFIG.cooler,
     cameraPos: [1.85, 0.78, 1.9],
     cameraTarget: [-0.08, 0.52, 0.0],
   },
@@ -275,6 +358,7 @@ export const PC_PARTS: PcPart[] = [
     specs: [
       { label: { th: 'หมายเหตุ', en: 'Note' }, value: SELLER_INFO.caseNote.en },
     ],
+    warranty: WARRANTY_CONFIG.case,
     cameraPos: [3.2, 0.9, 3.6],
     cameraTarget: [0, 0, 0],
   },
@@ -301,6 +385,7 @@ export const PC_PARTS: PcPart[] = [
       { label: { th: 'ความละเอียด / รีเฟรชเรต', en: 'Resolution / Refresh' }, value: '2560 × 1080 (WFHD 21:9) @ 200 Hz' },
       { label: { th: 'การเชื่อมต่อ', en: 'Connection' }, value: 'DisplayPort (จาก RTX 5060)' },
     ],
+    warranty: WARRANTY_CONFIG.monitor,
     cameraPos: [-3.2, 0.85, 3.9],
     cameraTarget: [-2.15, 0.12, -0.15],
   },
@@ -396,8 +481,11 @@ export const I18N = {
     resetBtn: 'รีเซ็ต',
     explodeSlider: 'แยกชิ้นส่วน',
     tabInspect: 'ชิ้นส่วน',
-    tabHealth: 'สภาพเครื่อง',
+    tabHealth: 'สภาพ & ประกัน',
     tabSpecs: 'สเปกรวม',
+    warrantyLabel: 'การรับประกัน',
+    warrantySectionTitle: 'สถานะการรับประกันรายชิ้น',
+    healthSectionTitle: 'ผลการตรวจเช็กสภาพเครื่อง',
     badgeVerified: 'ยืนยันจากเครื่องจริง',
     badgeUnverified: 'สอบถามรูปจริงจากผู้ขาย',
     copySpecsBtn: 'คัดลอกสเปกทั้งหมด',
@@ -421,8 +509,11 @@ export const I18N = {
     resetBtn: 'Reset',
     explodeSlider: 'Exploded View',
     tabInspect: 'Components',
-    tabHealth: 'Condition',
+    tabHealth: 'Condition & Warranty',
     tabSpecs: 'Full Specs',
+    warrantyLabel: 'Warranty',
+    warrantySectionTitle: 'Component Warranty Status',
+    healthSectionTitle: 'Hardware Health & Diagnostics',
     badgeVerified: 'Hardware Verified',
     badgeUnverified: 'Ask Seller for Photo',
     copySpecsBtn: 'Copy Full Specs',
